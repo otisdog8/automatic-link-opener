@@ -81,6 +81,7 @@ def main():
     observer.start()
 
     # Ok this can run for a year it should be fine. Hacky but idk how to get it work properly
+    # What this does is prevent the thread from dying when it reloads the config
     t = Timer(timedelta(days=365).total_seconds(), print)
     t.start()
 
