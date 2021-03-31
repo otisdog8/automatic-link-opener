@@ -1,49 +1,68 @@
 import pickle
 from os import path
-from datetime import time, tzinfo
+import datetime
 import pytz
 
 
-def get_config_dict():
+class Link:
+    def __init__(self, date, space, link):
+        self.date = date
+        self.space = space
+        self.link = link
+
+    def __str__(self):
+        return (
+            "starts at "
+            + str(self.date)
+            + " repeating every "
+            + str(self.space)
+            + " opening "
+            + self.link
+        )
+
+
+def get_config():
     config_path = path.expanduser("~/.config/link_opening/links")
     try:
         return pickle.load(open(config_path, "rb"))
     except:
-        return {}
+        # I know this is bad
+        return []
 
 
-def save_config_dict(dictionary):
+def save_config(config):
     config_path = path.expanduser("~/.config/link_opening/links")
-    pickle.dump(dictionary, open(config_path, "wb"))
+    pickle.dump(config, open(config_path, "wb"))
 
 
 def add_link():
-    config_dict = get_config_dict()
+    config = get_config()
     time_to_run = input(
-        "Enter your time (hh:mm:ss), hours are in military time and PST. If there are multiple at the same time put them at different seconds:  "
+        "Enter the first date to run the link opening (YYYY-MM-DD HH:MM:SS):  "
     )
+    days = int(input("Enter the number of days between runs: "))
+    hours = int(input("Enter the number of hours between runs: "))
+    minutes = int(input("Enter the number of minutes between runs: "))
+    seconds = int(input("Enter the number of seconds between runs: "))
+    time_between_runs = datetime.timedelta(
+        days=days, hours=hours, minutes=minutes, seconds=seconds
+    )
+    time_to_run = datetime.datetime.strptime(time_to_run, "%Y-%m-%d %H:%M:%S")
     link = input("Enter your link:  ")
-    timezone = pytz.timezone("America/Los_Angeles")
-    split_time = time_to_run.split(":")
-    hour = int(split_time[0])
-    minute = int(split_time[1])
-    second = int(split_time[2])
-    time_to_run = time(hour, minute, second, 0, timezone)
-    config_dict[time_to_run] = link
-    save_config_dict(config_dict)
+    link = Link(time_to_run, time_between_runs, link)
+    config.append(link)
+    save_config(config)
 
 
 def remove_link():
     # Display as a list then ask for index to remove. Add pagination later but it's not important
-    config_dict = get_config_dict()
-    keys = list(config_dict.keys())
-    for (i, k) in enumerate(keys):
-        print(str(i) + ":", k)
+    config = get_config()
+    for (i, k) in enumerate(config):
+        print(str(i) + ":", str(k))
     thing_to_delete = input("Enter the index of the thing you want to delete: ")
     thing_to_delete = int(thing_to_delete)
-    thing_to_delete = keys[thing_to_delete]
-    del config_dict[thing_to_delete]
-    save_config_dict(config_dict)
+    config.pop(thing_to_delete)
+    save_config(config)
 
 
 def main():

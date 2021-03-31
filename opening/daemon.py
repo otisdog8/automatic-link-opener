@@ -5,19 +5,40 @@ import pickle
 import webbrowser
 
 
-def get_config_dict():
+# Cool thing here, class instance data is serialized but the class itself is not, means I can have different class methods for the different things
+class Link:
+    def __init__(self, date, space, link):
+        self.date = date
+        self.space = space
+        self.link = link
+
+    def run_timer(self):
+        # first run of the timer
+        now = datetime.now()
+        while now > self.date:
+            self.date += self.space
+        # redoing incase this takes lots of time - just find how many seconds away date is1`
+        delta_t = self.date - datetime.now()
+        secs = delta_t.total_seconds()
+        self.timer = Timer(secs, self.run_link)
+        self.timer.start()
+
+    def cancel_timer(self):
+        self.timer.cancel()
+
+    def run_link(self):
+        webbrowser.open(self.link)
+        # Set a timer for the interval
+        self.timer = Timer(self.space.total_seconds(), self.run_link)
+        self.timer.start()
+
+
+def get_config():
     config_path = path.expanduser("~/.config/link_opening/links")
     try:
         return pickle.load(open(config_path, "rb"))
     except:
-        return {}
-
-
-def get_link_times():
-    # Reads the config and figures out when to run what
-    time_link_dict = {}
-
-    return time_link_dict
+        return []
 
 
 def run_link(**kwargs):
@@ -30,29 +51,9 @@ def run_link(**kwargs):
 
 def main():
     print("Hello, world!")
-    config_dict = get_config_dict()
-    for (k, v) in config_dict.items():
-        x = datetime.today()
-        # Happens before today, or happens after today
-        y = x.replace(
-            day=x.day,
-            hour=k.hour,
-            minute=k.minute,
-            second=k.second,
-            microsecond=k.microsecond,
-        )
-        if x > y:
-            y += timedelta(days=1)
-        else:
-            pass
-        delta_t = y - x
-        secs = delta_t.total_seconds()
-        arguments = {}
-        arguments["time"] = k
-        arguments["link"] = v
-        t = Timer(secs, run_link, kwargs=arguments)
-        t.start()
-
+    config = get_config()
+    for i in config:
+        i.run_timer()
     # First run - setup timers
 
 
