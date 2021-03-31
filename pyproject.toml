@@ -6,7 +6,7 @@ authors = ["Otisdog8 <otis@otisroot.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-pytz = "^2021.1"
+watchdog = "^2.0.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

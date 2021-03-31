@@ -3,7 +3,8 @@ from threading import Timer
 from os import path
 import pickle
 import webbrowser
-
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 # Cool thing here, class instance data is serialized but the class itself is not, means I can have different class methods for the different things
 class Link:
@@ -51,10 +52,37 @@ def run_link(**kwargs):
 
 def main():
     print("Hello, world!")
+
+    global config
     config = get_config()
     for i in config:
         i.run_timer()
-    # First run - setup timers
+
+    # I have to define it in here so the variables I need are in scope
+    class MyHandler(FileSystemEventHandler):
+        def on_any_event(self, event):
+            # This might not work
+            new_config = get_config()
+            for i in new_config:
+                i.run_timer()
+            # Reload the list of active timers
+            global config
+            for i in config:
+                i.cancel_timer()
+            config = new_config
+
+    event_handler = MyHandler()
+    observer = Observer()
+    observer.schedule(
+        event_handler,
+        path=path.expanduser("~/.config/link_opening/"),
+        recursive=False,
+    )
+    observer.start()
+
+    # Ok this can run for a year it should be fine. Hacky but idk how to get it work properly
+    t = Timer(timedelta(days=365).total_seconds(), print)
+    t.start()
 
 
 if __name__ == "__main__":

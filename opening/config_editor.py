@@ -53,6 +53,12 @@ def add_link():
     save_config(config)
 
 
+def list_links():
+    config = get_config()
+    for (i, k) in enumerate(config):
+        print(str(i) + ":", str(k))
+
+
 def remove_link():
     # Display as a list then ask for index to remove. Add pagination later but it's not important
     config = get_config()
@@ -67,11 +73,13 @@ def remove_link():
 def main():
     while 1:
         choice = input(
-            "Would you like to:\n1. Add a new link\n2. Remove an existing link\n3. Exit the program\n>  "
+            "Would you like to:\n0. List links\n1. Add a new link\n2. Remove an existing link\n3. Exit the program\n>  "
         )
         try:
             num = int(choice)
-            if num == 1:
+            if num == 0:
+                list_links()
+            elif num == 1:
                 add_link()
             elif num == 2:
                 remove_link()
