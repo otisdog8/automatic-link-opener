@@ -1,7 +1,6 @@
 import pickle
 from os import path
 import datetime
-import pytz
 
 
 class Link:
